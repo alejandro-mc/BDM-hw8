@@ -59,8 +59,7 @@ if __name__=='__main__':
 
     output = trips \
         .mapPartitions(tripMapper).map(lambda x: x).map(lambda x: x,1).reduceByKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))) \
-        .groupbyKey() \
-        .map(compute_top3)
+        .groupByKey().map(compute_top3)
 
     output.saveAsTextFile(sys.argv[-1])
 
