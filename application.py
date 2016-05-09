@@ -12,6 +12,8 @@ import shapely.geometry as geom
 ### 11 payment_type,fare_amount,surcharge,mta_tax,tip_amount,
 ### 16 tolls_amount,total_amount
 
+import operator
+import heapq
 
 def tripMapper(records):
     import rtree
@@ -40,9 +42,14 @@ def tripMapper(records):
             for ind in matches:
                 if any(map(lambda x: x.contains(point_destination), hoods.geometry[ind])):
                     boro_name = hoods.borough[ind]
-            yield ((neiborhood_name,boro_name),1)
+            yield ((neiborhood_name,boro_name), 1)
 
 
+def computeTop3(hoodcounts):
+    yield heapq.nlargest(3, hoodcounts, lambda x: x[1])
+
+def reduceTop3(top31, top32):
+    yield heapq.nlargest(3, top31+top32, lambda x: x[1])
 
 if __name__=='__main__':
     if len(sys.argv)<3:
@@ -54,7 +61,7 @@ if __name__=='__main__':
     trips = sc.textFile(','.join(sys.argv[1:-1]))
 
     output = trips \
-        .mapPartitions(tripMapper).take(50)
+        .mapPartitions(tripMapper).groubyKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))).groupbyKey() \
+        .mapPartitions(computeTop3).reduce(reduceTop3)
     
     output.saveAsTextFile(sys.argv[-1])
-
