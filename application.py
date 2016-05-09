@@ -45,11 +45,8 @@ def tripMapper(records):
             yield ((neiborhood_name,boro_name), 1)
 
 
-def computeTop3(hoodcounts):
-    yield heapq.nlargest(3, hoodcounts, lambda x: x[1])
-
-def reduceTop3(top31, top32):
-    yield heapq.nlargest(3, top31+top32, lambda x: x[1])
+def compute_top3((boro,hoodcounts)):
+    yield (boro, heapq.nlargest(3, hoodcounts, lambda x: x[1]))
 
 if __name__=='__main__':
     if len(sys.argv)<3:
@@ -61,7 +58,7 @@ if __name__=='__main__':
     trips = sc.textFile(','.join(sys.argv[1:-1]))
 
     output = trips \
-        .mapPartitions(tripMapper).groubyKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))).groupbyKey() \
-        .mapPartitions(computeTop3).reduce(reduceTop3)
+        .mapPartitions(tripMapper).reducebyKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))).groupbyKey() \
+        .map(compute_top3)
     
     output.saveAsTextFile(sys.argv[-1])
