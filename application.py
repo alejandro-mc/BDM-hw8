@@ -58,7 +58,10 @@ if __name__=='__main__':
     trips = sc.textFile(','.join(sys.argv[1:-1]))
 
     output = trips \
-        .mapPartitions(tripMapper).reducebyKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))).groupbyKey() \
+        .mapPartitions(tripMapper).map(lambda x: x).map(lambda x: x,1).reduceByKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))) \
+        .groupbyKey() \
         .map(compute_top3)
 
     output.saveAsTextFile(sys.argv[-1])
+
+    #groupbyKey does not work, i emailed prof.
