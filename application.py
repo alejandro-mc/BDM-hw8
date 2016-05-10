@@ -65,7 +65,8 @@ if __name__=='__main__':
     #output = trips \
      #   .mapPartitions(tripMapper).reduceByKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))) \
       #  .groupByKey().map(compute_top3)
-    output = sc.parallelize(trips.mapPartitions(tripMapper).reduceByKey(operator.add).take(100))
+    output = sc.parallelize(trips.mapPartitions(tripMapper).reduceByKey(operator.add).\
+                map(lambda x: (x[0][1], (x[0][0], x[1]))).take(100))
 
     output.saveAsTextFile(sys.argv[-1])
 
