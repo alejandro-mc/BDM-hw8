@@ -52,12 +52,15 @@ def tripMapper(records):
 
 def compute_top3((boro,hoodcounts)):
     return (boro, heapq.nlargest(3, hoodcounts, lambda x: x[1]))
+<<<<<<< HEAD
 
 
 def top3Reducer(lst1,lst2):
     return heapq.nlargest(3,lst1+lst2,lambda x: x[1])
 
 
+=======
+>>>>>>> de7dccb708290ea6aab01edf857a1065c5408bea
 
 if __name__=='__main__':
     if len(sys.argv)<3:
@@ -68,12 +71,16 @@ if __name__=='__main__':
 
     trips = sc.textFile(','.join(sys.argv[1:-1]))
 
+<<<<<<< HEAD
     #output = trips \
      #   .mapPartitions(tripMapper).reduceByKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))) \
       #  .groupByKey().map(compute_top3)
     output = sc.parallelize(trips.mapPartitions(tripMapper).reduceByKey(operator.add).\
                 map(lambda x: (x[0][1], [(x[0][0], x[1])])).reduceByKey(top3Reducer).collect())
+=======
+    output = trips \
+        .mapPartitions(tripMapper).reduceByKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))) \
+        .groupByKey().map(compute_top3)
+>>>>>>> de7dccb708290ea6aab01edf857a1065c5408bea
 
     output.saveAsTextFile(sys.argv[-1])
-
-    #groupbyKey does not work, i emailed prof.
