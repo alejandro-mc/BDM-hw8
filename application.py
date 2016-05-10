@@ -51,7 +51,13 @@ def tripMapper(records):
 
 
 def compute_top3((boro,hoodcounts)):
-    yield (boro, heapq.nlargest(3, hoodcounts, lambda x: x[1]))
+    return (boro, heapq.nlargest(3, hoodcounts, lambda x: x[1]))
+
+
+def top3Reducer(lst1,lst2):
+    return heapq.nlargest(3,lst1+lst2,lambda x: x[1])
+
+
 
 if __name__=='__main__':
     if len(sys.argv)<3:
@@ -66,7 +72,7 @@ if __name__=='__main__':
      #   .mapPartitions(tripMapper).reduceByKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))) \
       #  .groupByKey().map(compute_top3)
     output = sc.parallelize(trips.mapPartitions(tripMapper).reduceByKey(operator.add).\
-                map(lambda x: (x[0][1], (x[0][0], x[1]))).take(100))
+                map(lambda x: (x[0][1], [(x[0][0], x[1])])).reduceByKey(top3Reducer).collect())
 
     output.saveAsTextFile(sys.argv[-1])
 
