@@ -1,8 +1,9 @@
 ##Imports
-from pyspark import SparkContext
+import pyspark
 import rtree
 import geopandas as gpd
 import shapely.geometry as geom
+import sys
 
 ### yellow_tripdata_2011-05.csv
 
@@ -57,9 +58,10 @@ if __name__=='__main__':
 
     trips = sc.textFile(','.join(sys.argv[1:-1]))
 
-    output = trips \
-        .mapPartitions(tripMapper).mapPartitions(tripMapper).reduceByKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))) \
-        .groupByKey().map(compute_top3)
+    #output = trips \
+     #   .mapPartitions(tripMapper).reduceByKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))) \
+      #  .groupByKey().map(compute_top3)
+    output = sc.parallelize(trips.mapPartitions(tripMapper).take(100))
 
     output.saveAsTextFile(sys.argv[-1])
 
