@@ -46,7 +46,7 @@ def tripMapper(records):
 
 
 def compute_top3((boro,hoodcounts)):
-    yield (boro, heapq.nlargest(3, hoodcounts, lambda x: x[1]))
+    return (boro, heapq.nlargest(3, hoodcounts, lambda x: x[1]))
 
 if __name__=='__main__':
     if len(sys.argv)<3:
