@@ -31,8 +31,12 @@ def tripMapper(records):
     for record in records:
         list_record = record.split(',')
         if  list_record[0] != 'vendor_id' and list_record[0]!='':
-            point_origin      = geom.Point(float(list_record[5]),float(list_record[6]))
-            point_destination = geom.Point(float(list_record[9]),float(list_record[10]))
+            try:
+               point_origin      = geom.Point(float(list_record[5]),float(list_record[6]))
+               point_destination = geom.Point(float(list_record[9]),float(list_record[10]))
+            except:
+               continue
+
             #get origin neighborhood
             matches = list(index.intersection((point_origin.x,point_origin.y)))
             for ind in matches:
@@ -61,7 +65,7 @@ if __name__=='__main__':
     #output = trips \
      #   .mapPartitions(tripMapper).reduceByKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))) \
       #  .groupByKey().map(compute_top3)
-    output = sc.parallelize(trips.mapPartitions(tripMapper).take(100))
+    output = sc.parallelize(trips.mapPartitions(tripMapper).reduceByKey(operator.add).take(100))
 
     output.saveAsTextFile(sys.argv[-1])
 
