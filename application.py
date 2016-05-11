@@ -34,8 +34,8 @@ def tripMapper(records):
             
             pux = list_record[5]#pick up location x coordinate
             puy = list_record[6]#pick up location y coordinate
-            dox = list_record[9]#pick up location x coordinate
-            doy = list_record[10]#pick up location y coordinate
+            dox = list_record[9]#drop off location x coordinate
+            doy = list_record[10]#drop off location y coordinate
 
             if pux == '' or puy =='' or dox == '' or doy == '':
                continue
