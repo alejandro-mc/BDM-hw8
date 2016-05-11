@@ -69,8 +69,8 @@ if __name__=='__main__':
 
     trips = sc.textFile(','.join(sys.argv[1:-1]))
 
-    output = sc.parallelize(trips.mapPartitions(tripMapper).reduceByKey(operator.add).\
-                map(lambda x: (x[0][1],[(x[0][0],x[1])])).reduceByKey(top3Reducer).collect())
+    output = trips.mapPartitions(tripMapper).reduceByKey(operator.add).\
+                map(lambda x: (x[0][1],[(x[0][0],x[1])])).reduceByKey(top3Reducer)
 
 
     output.saveAsTextFile(sys.argv[-1])
