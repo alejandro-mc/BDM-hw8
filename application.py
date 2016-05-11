@@ -30,12 +30,18 @@ def tripMapper(records):
     boro_name = "Undefined"
     for record in records:
         list_record = record.split(',')
-        if  list_record[0] != 'vendor_id' and list_record[0]!='':
-            try:
-               point_origin      = geom.Point(float(list_record[5]),float(list_record[6]))
-               point_destination = geom.Point(float(list_record[9]),float(list_record[10]))
-            except:
+        if  record != '' and list_record[0] != 'vendor_id':#check for empty row and header
+            
+            pux = list_record[5]#pick up location x coordinate
+            puy = list_record[6]#pick up location y coordinate
+            dox = list_record[9]#pick up location x coordinate
+            doy = list_record[10]#pick up location y coordinate
+
+            if pux == '' or puy =='' or dox == '' or doy == '':
                continue
+
+            point_origin      = geom.Point(float(pux),float(puy))
+            point_destination = geom.Point(float(dox),float(doy))
 
             #get origin neighborhood
             matches = list(index.intersection((point_origin.x,point_origin.y)))
@@ -50,13 +56,8 @@ def tripMapper(records):
             yield ((neiborhood_name,boro_name), 1)
 
 
-def compute_top3((boro,hoodcounts)):
-    return (boro, heapq.nlargest(3, hoodcounts, lambda x: x[1]))
-
-
 def top3Reducer(lst1,lst2):
     return heapq.nlargest(3,lst1+lst2,lambda x: x[1])
-
 
 
 if __name__=='__main__':
@@ -68,12 +69,8 @@ if __name__=='__main__':
 
     trips = sc.textFile(','.join(sys.argv[1:-1]))
 
-
-    #output = trips \
-     #   .mapPartitions(tripMapper).reduceByKey(operator.add).map(lambda x: (x[0][1], (x[0][0], x[1]))) \
-      #  .groupByKey().map(compute_top3)
     output = sc.parallelize(trips.mapPartitions(tripMapper).reduceByKey(operator.add).\
-                map(lambda x: (x[0][1], [(x[0][0], x[1])])).reduceByKey(top3Reducer).collect())
+                map(lambda x: (x[0][1],[(x[0][0],x[1])])).reduceByKey(top3Reducer).collect())
 
 
     output.saveAsTextFile(sys.argv[-1])
